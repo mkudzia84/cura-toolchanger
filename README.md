@@ -1,3 +1,27 @@
+CuraEngine - Tool Changer patch:
+==========
+This forks contains enhancments for multi-toolhead printing;
+
+Current enhancments:
+- Improved prime tower generation:
+
+In the main branch Cura the prime tower is generated only by priming the new tool.
+This means in simple T1, T2 scenario we will have the following failure:
+
+```
+layer #1 : T1 primes, T1 prints, T1->T2, T2 primes on the brim, T2 prints
+layer #2 : T2 prints, T2->T1, T1 primes (the outer most layer)
+layer #3 : T1 prints, T1 primes (the outer most layer of prime towre is always constructed), T1 -> T2.....fail
+```
+T2 primes, but because there was no material printed in the T2 prime tower band - priming will happen in thin air and fail
+
+Situation is even worse in multi extruder configs.
+
+The new behavious is:
+- Prior to tool change, slicer checks if the current tool has been primed on the layer, if not it 'de-primes' it into the designated tool band
+- After tool change, new tool is primed, as in stock
+- At the end of the layer, slicer checks if there are any Tool specific bands that haven't been primed and deposits material there
+
 CuraEngine
 ==========
 The CuraEngine is a C++ console application for 3D printing GCode generation. It has been made as a better and faster alternative to the old Skeinforge engine.
